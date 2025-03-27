@@ -1,5 +1,6 @@
 package finki.ikt.iktproekt.model;
 
+import finki.ikt.iktproekt.model.enumeration.QuestionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,10 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long question_id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private QuestionType questionType;
 
     @Column(nullable = false, length = 500)
     private String questionText;
