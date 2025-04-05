@@ -1,5 +1,6 @@
 package finki.ikt.iktproekt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import finki.ikt.iktproekt.model.enumeration.QuestionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,6 +41,7 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id", nullable = false)
+    @JsonIgnore
     private Quiz quiz;
 
     @PrePersist
