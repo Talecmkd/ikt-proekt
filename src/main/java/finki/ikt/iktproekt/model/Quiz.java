@@ -33,6 +33,9 @@ public class Quiz {
     @JoinColumn(name = "document_id", nullable = false, unique = true)
     private Document document;
 
+    @Column(columnDefinition = "text")
+    private String pdfText;
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
