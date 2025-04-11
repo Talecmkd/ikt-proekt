@@ -70,7 +70,7 @@ public class QuestionGenerationServiceImpl {
             "Answer: [correct letter]\n" +
             "- Ensure each question has exactly 4 options\n" +
             "- Provide only the formatted questions, no additional text",
-            text.substring(0, Math.min(text.length(), 2000))
+            text.substring(0, Math.min(text.length(), 5000))
         );
     }
 
@@ -104,44 +104,59 @@ public class QuestionGenerationServiceImpl {
         
         for (String block : blocks) {
             try {
-                if (block.startsWith("Question:")) {
-                    Question question = new Question();
-                    question.setQuestionType(QuestionType.MULTIPLE_CHOICE);
-                    question.setQuiz(quiz);
-                    
-                    String[] lines = block.split("\n");
-                    question.setQuestionText(lines[0].replace("Question:", "").trim());
-                    
-                    List<String> answers = new ArrayList<>();
-                    for (int i = 1; i < lines.length && answers.size() < 4; i++) {
-                        if (lines[i].matches("^[A-D]\\) .*")) {
-                            answers.add(lines[i].substring(3).trim());
-                        }
-                    }
-                    question.setAnswers(answers);
-                    
-                    for (int i = 1; i < lines.length; i++) {
-                        if (lines[i].startsWith("Answer:")) {
-                            String correctLetter = lines[i].replace("Answer:", "").trim();
-                            if (!correctLetter.isEmpty() && !answers.isEmpty()) {
-                                int index = correctLetter.charAt(0) - 'A';
-                                if (index >= 0 && index < answers.size()) {
-                                    question.setCorrectAnswer(answers.get(index));
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    
-                    if (question.getCorrectAnswer() != null && !answers.isEmpty()) {
-                        questions.add(question);
-                    }
+                Question question = parseSingleQuestion(block, quiz);
+                if (question != null) {
+                    questions.add(question);
                 }
             } catch (Exception e) {
-                System.out.println("Failed to parse question block: {} " + block + " " +  e);
+                System.err.println("Failed to parse question block: " + block);
+                e.printStackTrace();
             }
         }
         
-        return questionRepository.saveAll(questions);
+        if (!questions.isEmpty()) {
+            return questionRepository.saveAll(questions);
+        }
+        return Collections.emptyList();
+    }
+    
+    private Question parseSingleQuestion(String block, Quiz quiz) {
+        if (!block.startsWith("Question:")) return null;
+        
+        String[] lines = block.split("\n");
+        if (lines.length < 6) return null; 
+        
+        Question question = new Question();
+        question.setQuestionType(QuestionType.MULTIPLE_CHOICE);
+        question.setQuiz(quiz);
+        question.setQuestionText(lines[0].replace("Question:", "").trim());
+        
+        List<String> answers = new ArrayList<>();
+        for (int i = 1; i < lines.length && answers.size() < 4; i++) {
+            if (lines[i].matches("^[A-D][).] .*")) { 
+                answers.add(lines[i].substring(3).trim());
+            }
+        }
+        
+        if (answers.size() < 2) return null; 
+        
+        question.setAnswers(answers);
+        
+        
+        for (int i = 1; i < lines.length; i++) {
+            if (lines[i].toLowerCase().startsWith("answer:")) {
+                String correctLetter = lines[i].replaceAll("(?i)answer:", "").trim();
+                if (!correctLetter.isEmpty()) {
+                    int index = correctLetter.toUpperCase().charAt(0) - 'A';
+                    if (index >= 0 && index < answers.size()) {
+                        question.setCorrectAnswer(answers.get(index));
+                        return question;
+                    }
+                }
+                break;
+            }
+        }
+        
+        return null; 
     }
 }
