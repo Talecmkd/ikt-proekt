@@ -1,6 +1,6 @@
 package finki.ikt.iktproekt.Service.impl;
 
-
+import finki.ikt.iktproekt.Service.QuestionGenerationService;
 import finki.ikt.iktproekt.model.*;
 import finki.ikt.iktproekt.model.enumeration.QuestionType;
 import finki.ikt.iktproekt.repository.QuestionRepository;
@@ -10,19 +10,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.azure.core.credential.AzureKeyCredential;
-import com.azure.ai.inference.models.ChatCompletionsOptions;
-import com.azure.ai.inference.models.ChatRequestMessage;
+import com.azure.ai.inference.models.*;
 import com.azure.ai.inference.ChatCompletionsClient;
-import com.azure.ai.inference.models.ChatCompletions;
-
 import com.azure.ai.inference.ChatCompletionsClientBuilder;
-import com.azure.ai.inference.models.ChatRequestUserMessage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
 @Service
-public class QuestionGenerationServiceImpl {
+public class QuestionGenerationServiceImpl implements QuestionGenerationService {
 
     private final String endpoint;
     private final String apiKey;
@@ -40,19 +37,13 @@ public class QuestionGenerationServiceImpl {
         this.questionRepository = questionRepository;
     }
 
+    @Override
     @Transactional
     public List<Question> generateQuestionsFromPdf(String filePath, Quiz quiz) throws IOException {
         String text = extractTextFromPdf(filePath);
-        
         String prompt = buildPrompt(text);
-        
         String aiResponse = getAIResponse(prompt);
-        System.out.println("AI Response: {}" + aiResponse);
-        
-        List<Question> questions = parseAndSaveQuestions(aiResponse, quiz);
-        System.out.println("Generated {} questions " + questions.size());
-        
-        return questions;
+        return parseAndSaveQuestions(aiResponse, quiz);
     }
 
     private String extractTextFromPdf(String filePath) throws IOException {
@@ -93,7 +84,6 @@ public class QuestionGenerationServiceImpl {
             ChatCompletions response = client.complete(options);
             return response.getChoices().get(0).getMessage().getContent();
         } catch (Exception e) {
-            System.out.println("Failed to get AI response " + e);
             throw new RuntimeException("AI service error", e);
         }
     }
@@ -114,35 +104,40 @@ public class QuestionGenerationServiceImpl {
             }
         }
         
-        if (!questions.isEmpty()) {
-            return questionRepository.saveAll(questions);
-        }
-        return Collections.emptyList();
+        return questions.isEmpty() ? Collections.emptyList() : questionRepository.saveAll(questions);
     }
     
     private Question parseSingleQuestion(String block, Quiz quiz) {
         if (!block.startsWith("Question:")) return null;
         
         String[] lines = block.split("\n");
-        if (lines.length < 6) return null; 
+        if (lines.length < 6) return null;
         
         Question question = new Question();
         question.setQuestionType(QuestionType.MULTIPLE_CHOICE);
         question.setQuiz(quiz);
         question.setQuestionText(lines[0].replace("Question:", "").trim());
         
+        List<String> answers = extractAnswers(lines);
+        if (answers.size() < 2) return null;
+        
+        question.setAnswers(answers);
+        setCorrectAnswer(question, lines, answers);
+        
+        return question.getCorrectAnswer() != null ? question : null;
+    }
+
+    private List<String> extractAnswers(String[] lines) {
         List<String> answers = new ArrayList<>();
         for (int i = 1; i < lines.length && answers.size() < 4; i++) {
-            if (lines[i].matches("^[A-D][).] .*")) { 
+            if (lines[i].matches("^[A-D][).] .*")) {
                 answers.add(lines[i].substring(3).trim());
             }
         }
-        
-        if (answers.size() < 2) return null; 
-        
-        question.setAnswers(answers);
-        
-        
+        return answers;
+    }
+
+    private void setCorrectAnswer(Question question, String[] lines, List<String> answers) {
         for (int i = 1; i < lines.length; i++) {
             if (lines[i].toLowerCase().startsWith("answer:")) {
                 String correctLetter = lines[i].replaceAll("(?i)answer:", "").trim();
@@ -150,13 +145,10 @@ public class QuestionGenerationServiceImpl {
                     int index = correctLetter.toUpperCase().charAt(0) - 'A';
                     if (index >= 0 && index < answers.size()) {
                         question.setCorrectAnswer(answers.get(index));
-                        return question;
                     }
                 }
                 break;
             }
         }
-        
-        return null; 
     }
 }

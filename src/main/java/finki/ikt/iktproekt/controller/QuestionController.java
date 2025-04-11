@@ -1,6 +1,6 @@
 package finki.ikt.iktproekt.controller;
 
-import finki.ikt.iktproekt.Service.impl.QuestionGenerationServiceImpl;
+import finki.ikt.iktproekt.Service.QuestionGenerationService;
 import finki.ikt.iktproekt.model.Question;
 import finki.ikt.iktproekt.model.Quiz;
 import finki.ikt.iktproekt.repository.QuizRepository;
@@ -12,10 +12,10 @@ import java.util.List;
 @RequestMapping("/api/questions")
 public class QuestionController {
 
-    private final QuestionGenerationServiceImpl questionGenerationService;
+    private final QuestionGenerationService questionGenerationService;
     private final QuizRepository quizRepository;
 
-    public QuestionController(QuestionGenerationServiceImpl questionGenerationService,
+    public QuestionController(QuestionGenerationService questionGenerationService,
                               QuizRepository quizRepository) {
         this.questionGenerationService = questionGenerationService;
         this.quizRepository = quizRepository;
