@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
+import java.util.List;
+
 
 @Controller
 @RequestMapping("/api/quizzes")
@@ -20,7 +22,7 @@ public class QuizController {
         this.quizService = quizService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Long> createQuiz(@Valid @RequestBody Quiz quiz) {
         Quiz createdQuiz = quizService.create(quiz);
         return ResponseEntity.created(URI.create("/api/quizzes/" + createdQuiz.getQuiz_id()))
@@ -34,5 +36,8 @@ public class QuizController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
+    @GetMapping("/all")
+    public ResponseEntity<List<Quiz>> getAllQuizzes() {
+        return ResponseEntity.ok(quizService.findAll());
+    }
 }
