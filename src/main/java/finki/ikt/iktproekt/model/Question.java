@@ -1,6 +1,6 @@
 package finki.ikt.iktproekt.model;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import finki.ikt.iktproekt.model.enumeration.QuestionType;
 import jakarta.persistence.*;
 
@@ -36,6 +36,7 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "quiz_id", nullable = false)
     @JsonBackReference
+    @JsonIgnore
     private Quiz quiz;
 
     public Question() {

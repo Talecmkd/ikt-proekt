@@ -12,3 +12,6 @@ target/
 
 ### VS Code (if you ever use it) ###
 .vscode/
+
+### Uploads
+*/uploads
