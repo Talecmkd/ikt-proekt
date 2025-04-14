@@ -1,5 +1,7 @@
 package finki.ikt.iktproekt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,16 +29,19 @@ public class Quiz {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @OneToOne
     @JoinColumn(name = "document_id", nullable = false, unique = true)
+    @JsonIgnore
     private Document document;
 
     @Column(columnDefinition = "text")
     private String pdfText;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Question> questions;
 
     @PrePersist
@@ -89,5 +94,9 @@ public class Quiz {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
+    }
+
+    public void setPdfText(String pdfText) {
+        this.pdfText = pdfText;
     }
 }

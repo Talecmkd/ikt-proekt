@@ -30,6 +30,7 @@ public class QuizController {
     }
 
     @GetMapping("/{id}")
+//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Quiz> getQuizById(@PathVariable Long id) {
         Optional<Quiz> quiz = quizService.findById(id);
         return quiz.map(ResponseEntity::ok)
