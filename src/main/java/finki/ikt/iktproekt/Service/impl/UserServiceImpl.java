@@ -69,7 +69,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(password));
         user.setCreatedAt(LocalDateTime.now());
 
-
         return userRepository.save(user);
     }
 }
