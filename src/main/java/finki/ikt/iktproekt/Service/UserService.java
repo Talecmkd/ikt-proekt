@@ -1,6 +1,7 @@
 package finki.ikt.iktproekt.Service;
 
 import finki.ikt.iktproekt.model.User;
+import finki.ikt.iktproekt.model.enumeration.Role;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface UserService {
     void delete(Long id);
     Optional<User> findByEmailAndPassword(String email, String password);
     Optional<User> findByEmail(String email);
-    User registerUser(String name, String email, String password, LocalDateTime createdAt);
+    User registerUser(String name, String email, String password, Role role,LocalDateTime createdAt);
 
 
 }

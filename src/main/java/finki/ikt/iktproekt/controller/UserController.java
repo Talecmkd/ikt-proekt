@@ -1,11 +1,13 @@
 package finki.ikt.iktproekt.controller;
 import finki.ikt.iktproekt.Service.UserService;
 import finki.ikt.iktproekt.model.User;
+import finki.ikt.iktproekt.model.enumeration.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -33,7 +35,7 @@ public class UserController {
     }
 
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<User> createUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.create(user));
     }
@@ -49,7 +51,7 @@ public class UserController {
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("deleteUser/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
@@ -57,11 +59,29 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestParam String name,
-                                             @RequestParam String email,
-                                             @RequestParam String password) {
+    public ResponseEntity<User> registerUser(@RequestBody Map<String, String> request) {
         try {
-            User registeredUser = userService.registerUser(name, email, password, LocalDateTime.now());
+            String roleStr = request.get("role");
+            Role role = null;
+
+            // Convert string to enum value if provided
+            if (roleStr != null && !roleStr.isEmpty()) {
+                try {
+                    role = Role.valueOf(roleStr.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    // Invalid role provided
+                    return ResponseEntity.badRequest().body(null);
+                }
+            }
+
+            // Update your service method to accept role parameter
+            User registeredUser = userService.registerUser(
+                    request.get("name"),
+                    request.get("email"),
+                    request.get("password"),
+                    role, // Pass the enum Role
+                    LocalDateTime.now()
+            );
             return ResponseEntity.ok(registeredUser);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);

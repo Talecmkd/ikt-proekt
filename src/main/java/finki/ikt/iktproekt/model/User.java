@@ -1,5 +1,6 @@
 package finki.ikt.iktproekt.model;
 
+import finki.ikt.iktproekt.model.enumeration.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,4 +74,7 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-}
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+        public Role role;
+    }

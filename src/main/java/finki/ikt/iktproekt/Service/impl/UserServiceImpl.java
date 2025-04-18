@@ -2,6 +2,7 @@ package finki.ikt.iktproekt.Service.impl;
 
 import finki.ikt.iktproekt.Service.UserService;
 import finki.ikt.iktproekt.model.User;
+import finki.ikt.iktproekt.model.enumeration.Role;
 import finki.ikt.iktproekt.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,12 +13,14 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
     private  final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+   private final PasswordEncoder passwordEncoder;
 
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository
+                           ,PasswordEncoder passwordEncoder
+                           ) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+       this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -58,7 +61,7 @@ public class UserServiceImpl implements UserService {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-    public User registerUser(String name, String email, String password, LocalDateTime createdAt) {
+    public User registerUser(String name, String email, String password, Role role, LocalDateTime createdAt) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists!");
         }
@@ -67,6 +70,8 @@ public class UserServiceImpl implements UserService {
         user.setName(name);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
+        user.role = role;
+        //user.setPassword(password);
         user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
