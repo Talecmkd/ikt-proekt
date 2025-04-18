@@ -1,11 +1,11 @@
 package finki.ikt.iktproekt.Service.impl;
 
 import finki.ikt.iktproekt.Service.QuizService;
-import finki.ikt.iktproekt.model.Question;
 import finki.ikt.iktproekt.model.Quiz;
 import finki.ikt.iktproekt.repository.QuizRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +42,15 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public void delete(Long id) {
-            quizRepository.deleteById(id);
+        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+        if (quiz.getDocument() != null && quiz.getDocument().getFilePath() != null) {
+            File file = new File(quiz.getDocument().getFilePath());
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+
+        quizRepository.deleteById(id);
     }
 }
