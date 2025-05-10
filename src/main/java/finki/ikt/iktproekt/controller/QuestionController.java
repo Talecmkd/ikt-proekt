@@ -1,6 +1,6 @@
 package finki.ikt.iktproekt.controller;
 
-import finki.ikt.iktproekt.Service.QuestionGenerationService;
+import finki.ikt.iktproekt.service.QuestionGenerationService;
 import finki.ikt.iktproekt.model.Question;
 import finki.ikt.iktproekt.model.Quiz;
 import finki.ikt.iktproekt.repository.QuizRepository;

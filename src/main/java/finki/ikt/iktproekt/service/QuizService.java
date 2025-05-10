@@ -1,4 +1,4 @@
-package finki.ikt.iktproekt.Service;
+package finki.ikt.iktproekt.service;
 
 
 import finki.ikt.iktproekt.model.Quiz;

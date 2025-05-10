@@ -1,6 +1,6 @@
 package finki.ikt.iktproekt.controller;
 
-import finki.ikt.iktproekt.Service.UserService;
+import finki.ikt.iktproekt.service.UserService;
 import finki.ikt.iktproekt.model.User;
 import finki.ikt.iktproekt.model.dto.AuthenticationDTOs.AuthenticationRequest;
 import finki.ikt.iktproekt.model.dto.AuthenticationDTOs.AuthenticationResponse;
@@ -56,7 +56,7 @@ public class AuthController {
             User user = userOpt.get();
             AuthenticationResponse response = new AuthenticationResponse(
                     jwt,
-                    user.getUser_id(),
+                    user.getId(),
                     user.getName(),
                     user.getEmail(),
                     user.role != null ? user.role.name() : "USER"

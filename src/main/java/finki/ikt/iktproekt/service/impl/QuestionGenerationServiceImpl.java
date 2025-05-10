@@ -1,6 +1,6 @@
-package finki.ikt.iktproekt.Service.impl;
+package finki.ikt.iktproekt.service.impl;
 
-import finki.ikt.iktproekt.Service.QuestionGenerationService;
+import finki.ikt.iktproekt.service.QuestionGenerationService;
 import finki.ikt.iktproekt.model.*;
 import finki.ikt.iktproekt.model.enumeration.QuestionType;
 import finki.ikt.iktproekt.repository.QuestionRepository;
@@ -121,8 +121,8 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
         List<String> answers = extractAnswers(lines);
         if (answers.size() < 2) return null;
         
-        question.setAnswers(answers);
-        setCorrectAnswer(question, lines, answers);
+//        question.setAnswers(answers);
+//        setCorrectAnswer(question, lines, answers);
         
         return question.getCorrectAnswer() != null ? question : null;
     }

@@ -1,6 +1,6 @@
-package finki.ikt.iktproekt.Service.impl;
+package finki.ikt.iktproekt.service.impl;
 
-import finki.ikt.iktproekt.Service.UserService;
+import finki.ikt.iktproekt.service.UserService;
 import finki.ikt.iktproekt.model.User;
 import finki.ikt.iktproekt.model.enumeration.Role;
 import finki.ikt.iktproekt.repository.UserRepository;
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long id, User user) {
         if (userRepository.existsById(id)) {
-            user.setUser_id(id);
+//            user.setUser_id(id);
             return userRepository.save(user);
         }
         throw new RuntimeException("User not found");

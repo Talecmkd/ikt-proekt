@@ -1,5 +1,5 @@
 package finki.ikt.iktproekt.controller;
-import finki.ikt.iktproekt.Service.UserService;
+import finki.ikt.iktproekt.service.UserService;
 import finki.ikt.iktproekt.model.User;
 import finki.ikt.iktproekt.model.enumeration.Role;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")

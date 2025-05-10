@@ -1,6 +1,6 @@
-package finki.ikt.iktproekt.Service.impl;
+package finki.ikt.iktproekt.service.impl;
 
-import finki.ikt.iktproekt.Service.DocumentService;
+import finki.ikt.iktproekt.service.DocumentService;
 import finki.ikt.iktproekt.model.Document;
 import finki.ikt.iktproekt.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Document update(Long id, Document document) {
         if (documentRepository.existsById(id)) {
-            document.setDocument_id(id);
+//            document.setDocument_id(id);
             return documentRepository.save(document);
         }
         throw new RuntimeException("Document not found");

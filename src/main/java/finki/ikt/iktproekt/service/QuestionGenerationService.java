@@ -1,4 +1,4 @@
-package finki.ikt.iktproekt.Service;
+package finki.ikt.iktproekt.service;
 
 import java.io.IOException;
 import java.util.List;

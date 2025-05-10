@@ -1,10 +1,9 @@
 package finki.ikt.iktproekt.controller;
 
-import finki.ikt.iktproekt.Service.DocumentService;
-import finki.ikt.iktproekt.Service.QuestionGenerationService;
-import finki.ikt.iktproekt.Service.QuizService;
-import finki.ikt.iktproekt.Service.UserService;
-import finki.ikt.iktproekt.Service.impl.QuestionGenerationServiceImpl;
+import finki.ikt.iktproekt.service.DocumentService;
+import finki.ikt.iktproekt.service.QuestionGenerationService;
+import finki.ikt.iktproekt.service.QuizService;
+import finki.ikt.iktproekt.service.UserService;
 import finki.ikt.iktproekt.model.Document;
 import finki.ikt.iktproekt.model.Question;
 import finki.ikt.iktproekt.model.Quiz;
@@ -79,12 +78,12 @@ public class DocumentController {
             Quiz quiz = new Quiz();
             quiz.setTitle("Quiz for " + file.getOriginalFilename());
             quiz.setUser(user);
-            quiz.setDocument(document);
+//            quiz.setDocument(document);
             quizService.create(quiz);
             
             // Generate questions from PDF
             List<Question> questions = questionGenerationService.generateQuestionsFromPdf(filePath, quiz);
-            quiz.setQuestions(questions);
+//            quiz.setQuestions(questions);
             
             quizService.create(quiz);
             

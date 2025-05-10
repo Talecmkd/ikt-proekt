@@ -1,9 +1,8 @@
-package finki.ikt.iktproekt.Service.impl;
+package finki.ikt.iktproekt.service.impl;
 
-import finki.ikt.iktproekt.Service.QuestionService;
+import finki.ikt.iktproekt.service.QuestionService;
 import finki.ikt.iktproekt.model.Question;
 import finki.ikt.iktproekt.repository.QuestionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

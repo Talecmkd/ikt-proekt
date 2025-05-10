@@ -1,8 +1,7 @@
 package finki.ikt.iktproekt.controller;
 
-import finki.ikt.iktproekt.Service.DocumentService;
-import finki.ikt.iktproekt.Service.QuizService;
-import finki.ikt.iktproekt.model.Document;
+import finki.ikt.iktproekt.service.DocumentService;
+import finki.ikt.iktproekt.service.QuizService;
 import finki.ikt.iktproekt.model.Quiz;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,8 +28,8 @@ public class QuizController {
     @PostMapping("/create")
     public ResponseEntity<Long> createQuiz(@Valid @RequestBody Quiz quiz) {
         Quiz createdQuiz = quizService.create(quiz);
-        return ResponseEntity.created(URI.create("/api/quizzes/" + createdQuiz.getQuiz_id()))
-                .body(createdQuiz.getQuiz_id());
+        return ResponseEntity.created(URI.create("/api/quizzes/" + createdQuiz.getId()))
+                .body(createdQuiz.getId());
     }
 
     @GetMapping("/{id}")
