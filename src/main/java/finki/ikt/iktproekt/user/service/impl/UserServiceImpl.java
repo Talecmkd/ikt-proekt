@@ -4,12 +4,12 @@ import finki.ikt.iktproekt.exception.NotFoundEntityException;
 
 import finki.ikt.iktproekt.security.JwtUtil;
 
-import finki.ikt.iktproekt.user.model.dto.AuthenticationRequest;
-import finki.ikt.iktproekt.user.model.dto.AuthenticationResponse;
-import finki.ikt.iktproekt.user.model.enumaration.Role;
 import finki.ikt.iktproekt.user.model.User;
+
 import finki.ikt.iktproekt.user.repository.UserRepository;
+
 import finki.ikt.iktproekt.user.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,8 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 import java.util.List;
 import java.util.Optional;
