@@ -1,6 +1,8 @@
 package finki.ikt.iktproekt.document.service;
 
 import finki.ikt.iktproekt.document.model.Document;
+import finki.ikt.iktproekt.document.model.dto.DocumentDto;
+import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.user.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,4 +22,8 @@ public interface DocumentService {
     void delete(Long id);
 
     Document validateAndSaveFile(MultipartFile file, User user);
+
+    Document findDocumentByQuiz(Quiz quiz);
+
+    DocumentDto mapDocumentToDto(Document document);
 }

@@ -1,6 +1,8 @@
 package finki.ikt.iktproekt.document.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
+import finki.ikt.iktproekt.document.model.dto.DocumentDto;
+import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.user.model.User;
 
 import finki.ikt.iktproekt.document.repository.DocumentRepository;
@@ -86,5 +88,20 @@ public class DocumentServiceImpl implements DocumentService {
         document.setUser(user);
 
         return create(document);
+    }
+
+    @Override
+    public Document findDocumentByQuiz(Quiz quiz) {
+        return documentRepository.findDocumentByQuiz(quiz);
+    }
+
+    @Override
+    public DocumentDto mapDocumentToDto(Document document) {
+        DocumentDto documentDto = new DocumentDto();
+        documentDto.setId(document.getId());
+        documentDto.setFilePath(document.getFilePath());
+        documentDto.setProcessed(document.isProcessed());
+
+        return documentDto;
     }
 }

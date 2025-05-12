@@ -1,5 +1,6 @@
 package finki.ikt.iktproekt.question.service.impl;
 
+import finki.ikt.iktproekt.document.service.DocumentService;
 import finki.ikt.iktproekt.exception.NotFoundEntityException;
 
 import finki.ikt.iktproekt.question.model.Question;
@@ -9,7 +10,6 @@ import finki.ikt.iktproekt.question.model.enumeration.QuestionType;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 
 import finki.ikt.iktproekt.question.repository.QuestionRepository;
-import finki.ikt.iktproekt.document.repository.DocumentRepository;
 
 
 import finki.ikt.iktproekt.question.service.QuestionGenerationService;
@@ -59,7 +59,7 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
 
     private final QuizRepository quizRepository;
 
-    private final DocumentRepository documentRepository;
+    private final DocumentService documentService;
 
     @Override
     @Transactional
@@ -67,7 +67,9 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new NotFoundEntityException(Quiz.class));
 
-        Document document = documentRepository.findDocumentByQuiz(quiz);
+        questionRepository.deleteAllByQuiz(quiz);
+
+        Document document = documentService.findDocumentByQuiz(quiz);
 
         String text;
         try {

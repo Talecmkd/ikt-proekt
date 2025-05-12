@@ -1,8 +1,12 @@
 package finki.ikt.iktproekt.quiz.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
+import finki.ikt.iktproekt.document.model.dto.DocumentDto;
+import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 import finki.ikt.iktproekt.user.model.User;
 import finki.ikt.iktproekt.quiz.model.Quiz;
+
+import finki.ikt.iktproekt.exception.NotFoundEntityException;
 
 import finki.ikt.iktproekt.document.service.DocumentService;
 import finki.ikt.iktproekt.quiz.service.QuizService;
@@ -17,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +38,9 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Optional<Quiz> findById(Long id) {
-        return quizRepository.findById(id);
+    public Quiz findById(Long id) {
+        return quizRepository.findById(id)
+                .orElseThrow(() -> new NotFoundEntityException(Quiz.class));
     }
 
     @Override
@@ -75,5 +79,18 @@ public class QuizServiceImpl implements QuizService {
 //        }
 
         quizRepository.deleteById(id);
+    }
+
+    @Override
+    public QuizDto mapQuizToDto(Quiz quiz) {
+        Document document = documentService.findDocumentByQuiz(quiz);
+        DocumentDto documentDto = documentService.mapDocumentToDto(document);
+
+        QuizDto quizDto = new QuizDto();
+        quizDto.setId(quiz.getId());
+        quizDto.setDocument(documentDto);
+        quizDto.setTitle(quiz.getTitle());
+
+        return quizDto;
     }
 }

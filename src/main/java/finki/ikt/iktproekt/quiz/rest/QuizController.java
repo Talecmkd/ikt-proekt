@@ -2,6 +2,7 @@ package finki.ikt.iktproekt.quiz.rest;
 
 import finki.ikt.iktproekt.quiz.model.Quiz;
 
+import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 import finki.ikt.iktproekt.quiz.service.QuizService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
 import java.util.List;
 
 @Controller
@@ -36,10 +36,9 @@ public class QuizController {
 
     @GetMapping("/{id}")
 //    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Quiz> getQuizById(@PathVariable Long id) {
-        Optional<Quiz> quiz = quizService.findById(id);
-        return quiz.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<QuizDto> getQuizById(@PathVariable Long id) {
+        Quiz quiz = quizService.findById(id);
+        return ResponseEntity.ok(quizService.mapQuizToDto(quiz));
     }
 
     @GetMapping("/all")
