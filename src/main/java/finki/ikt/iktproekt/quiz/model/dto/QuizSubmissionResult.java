@@ -1,4 +1,4 @@
-package finki.ikt.iktproekt.model.dto;
+package finki.ikt.iktproekt.quiz.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

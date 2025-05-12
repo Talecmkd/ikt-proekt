@@ -1,6 +1,6 @@
 package finki.ikt.iktproekt.quiz.service;
 
-import finki.ikt.iktproekt.model.dto.QuizSubmissionResult;
+import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 

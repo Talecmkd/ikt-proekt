@@ -1,7 +1,7 @@
 package finki.ikt.iktproekt.quiz.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import finki.ikt.iktproekt.model.dto.QuizSubmissionResult;
+import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.question.service.QuestionService;
 import finki.ikt.iktproekt.quiz.model.Quiz;

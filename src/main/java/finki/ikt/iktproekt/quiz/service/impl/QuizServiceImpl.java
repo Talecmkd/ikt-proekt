@@ -2,7 +2,7 @@ package finki.ikt.iktproekt.quiz.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
 import finki.ikt.iktproekt.document.model.dto.DocumentDto;
-import finki.ikt.iktproekt.model.dto.QuizSubmissionResult;
+import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 import finki.ikt.iktproekt.user.model.User;
