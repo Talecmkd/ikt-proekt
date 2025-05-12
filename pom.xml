@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -80,11 +80,11 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-    <dependency>
-    <groupId>com.azure</groupId>
-    <artifactId>azure-ai-inference</artifactId>
-    <version>1.0.0-beta.4</version>
-</dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-ai-inference</artifactId>
+            <version>1.0.0-beta.4</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
@@ -92,12 +92,6 @@
             <version>2.0.27</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version> <!-- or latest -->
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -139,18 +133,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
@@ -164,8 +146,6 @@
             </plugin>
         </plugins>
     </build>
-
-
 
 
 </project>

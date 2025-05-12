@@ -1,7 +1,7 @@
 package finki.ikt.iktproekt.security;
 
-import finki.ikt.iktproekt.model.User;
-import finki.ikt.iktproekt.repository.UserRepository;
+import finki.ikt.iktproekt.user.model.User;
+import finki.ikt.iktproekt.user.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
