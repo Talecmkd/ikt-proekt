@@ -1,47 +1,80 @@
 package finki.ikt.iktproekt.question.service.impl;
 
+import finki.ikt.iktproekt.exception.NotFoundEntityException;
+
 import finki.ikt.iktproekt.question.model.Question;
+import finki.ikt.iktproekt.document.model.Document;
+
 import finki.ikt.iktproekt.question.model.enumeration.QuestionType;
-import finki.ikt.iktproekt.question.repository.QuestionRepository;
-import finki.ikt.iktproekt.question.service.QuestionGenerationService;
 import finki.ikt.iktproekt.quiz.model.Quiz;
+
+import finki.ikt.iktproekt.question.repository.QuestionRepository;
+import finki.ikt.iktproekt.document.repository.DocumentRepository;
+
+
+import finki.ikt.iktproekt.question.service.QuestionGenerationService;
+
+import finki.ikt.iktproekt.quiz.repository.QuizRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
+
 import org.apache.pdfbox.text.PDFTextStripper;
+
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
+
 import com.azure.core.credential.AzureKeyCredential;
+
 import com.azure.ai.inference.models.*;
+
 import com.azure.ai.inference.ChatCompletionsClient;
 import com.azure.ai.inference.ChatCompletionsClientBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class QuestionGenerationServiceImpl implements QuestionGenerationService {
 
-    private final String endpoint;
-    private final String apiKey;
-    private final String modelName;
+    @Value("${azure.ai.endpoint}")
+    private String endpoint;
+
+    @Value("${azure.ai.api-key}")
+    private String apiKey;
+
+    @Value("${azure.ai.model}")
+    private String modelName;
+
     private final QuestionRepository questionRepository;
 
-    public QuestionGenerationServiceImpl(
-            @Value("${azure.ai.endpoint}") String endpoint,
-            @Value("${azure.ai.api-key}") String apiKey,
-            @Value("${azure.ai.model}") String modelName,
-            QuestionRepository questionRepository) {
-        this.endpoint = endpoint;
-        this.apiKey = apiKey;
-        this.modelName = modelName;
-        this.questionRepository = questionRepository;
-    }
+    private final QuizRepository quizRepository;
+
+    private final DocumentRepository documentRepository;
 
     @Override
     @Transactional
-    public List<Question> generateQuestionsFromPdf(String filePath, Quiz quiz) throws IOException {
-        String text = extractTextFromPdf(filePath);
+    public List<Question> generateQuestionsFromPdf(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new NotFoundEntityException(Quiz.class));
+
+        Document document = documentRepository.findDocumentByQuiz(quiz);
+
+        String text;
+        try {
+            text = extractTextFromPdf(document.getFilePath());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to extract text from pdf");
+        }
         String prompt = buildPrompt(text);
         String aiResponse = getAIResponse(prompt);
         return parseAndSaveQuestions(aiResponse, quiz);
@@ -122,8 +155,8 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
         List<String> answers = extractAnswers(lines);
         if (answers.size() < 2) return null;
         
-//        question.setAnswers(answers);
-//        setCorrectAnswer(question, lines, answers);
+        question.setAnswers(answers);
+        setCorrectAnswer(question, lines, answers);
         
         return question.getCorrectAnswer() != null ? question : null;
     }

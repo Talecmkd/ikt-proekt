@@ -10,12 +10,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.JoinColumn;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,8 +34,10 @@ public class Question extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String questionText;
 
-    @Column(nullable = false)
-    private String answers;
+    @ElementCollection
+    @CollectionTable(name = "question_answers", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "answer", nullable = false)
+    private List<String> answers;
 
     @Column(nullable = false)
     private String correctAnswer;
