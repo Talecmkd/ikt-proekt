@@ -1,11 +1,13 @@
 package finki.ikt.iktproekt.quiz.service;
 
+import finki.ikt.iktproekt.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface QuizService {
     List<Quiz> findAll();
@@ -19,4 +21,6 @@ public interface QuizService {
     void delete(Long id);
 
     QuizDto mapQuizToDto(Quiz quiz);
+
+    QuizSubmissionResult submitQuiz(Long quizId, Map<Long, String> userAnswers);
 }

@@ -1,5 +1,9 @@
 package finki.ikt.iktproekt.quiz.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import finki.ikt.iktproekt.model.dto.QuizSubmissionResult;
+import finki.ikt.iktproekt.question.model.Question;
+import finki.ikt.iktproekt.question.service.QuestionService;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
@@ -7,19 +11,20 @@ import finki.ikt.iktproekt.quiz.service.QuizService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api/quiz")
@@ -27,6 +32,10 @@ import java.util.List;
 public class QuizController {
 
     private final QuizService quizService;
+
+    private final ObjectMapper objectMapper;
+
+    private final QuestionService questionService;
 
     @PostMapping("/create")
     public ResponseEntity<Quiz> createQuiz(@RequestParam String title,
@@ -50,5 +59,33 @@ public class QuizController {
     public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
         quizService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/export/json")
+    public ResponseEntity<byte[]> exportQuizAsJson(@PathVariable Long id) throws IOException {
+        Quiz quiz = quizService.findById(id);
+
+        Map<String, Object> quizData = new HashMap<>();
+        quizData.put("title", quiz.getTitle());
+
+        List<Question> questions = questionService.findAllByQuizId(id);
+        quizData.put("questions", questions);
+
+        String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(quizData);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentDispositionFormData("attachment", quiz.getTitle().replaceAll("\\\s+", "_") + ".json");
+        headers.setContentLength(jsonContent.getBytes(StandardCharsets.UTF_8).length);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(jsonContent.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<QuizSubmissionResult> submitQuiz(@PathVariable Long id, @RequestBody Map<Long, String> userAnswers) {
+        QuizSubmissionResult result = quizService.submitQuiz(id, userAnswers);
+        return ResponseEntity.ok(result);
     }
 }
