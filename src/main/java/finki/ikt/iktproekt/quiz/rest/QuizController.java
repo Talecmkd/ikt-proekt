@@ -9,9 +9,13 @@ import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 import finki.ikt.iktproekt.quiz.service.QuizService;
 
+import finki.ikt.iktproekt.results.model.UserQuizResults;
+import finki.ikt.iktproekt.user.model.User;
+import finki.ikt.iktproekt.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,6 +40,7 @@ public class QuizController {
     private final ObjectMapper objectMapper;
 
     private final QuestionService questionService;
+    private final UserService userService;
 
     @PostMapping("/create")
     public ResponseEntity<Quiz> createQuiz(@RequestParam String title,
@@ -84,8 +89,14 @@ public class QuizController {
     }
 
     @PostMapping("/{id}/submit")
-    public ResponseEntity<QuizSubmissionResult> submitQuiz(@PathVariable Long id, @RequestBody Map<Long, String> userAnswers) {
-        QuizSubmissionResult result = quizService.submitQuiz(id, userAnswers);
+    public ResponseEntity<UserQuizResults> submitQuiz(@PathVariable Long id, @RequestBody Map<Long, String> userAnswers) {
+        User user = userService.getCurrentLoggedInUser();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        long startTime = System.currentTimeMillis();
+        UserQuizResults result = quizService.submitQuiz(id, userAnswers, user, System.currentTimeMillis() - startTime);
         return ResponseEntity.ok(result);
     }
 }

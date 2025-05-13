@@ -4,6 +4,8 @@ import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
 
+import finki.ikt.iktproekt.results.model.UserQuizResults;
+import finki.ikt.iktproekt.user.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -22,5 +24,5 @@ public interface QuizService {
 
     QuizDto mapQuizToDto(Quiz quiz);
 
-    QuizSubmissionResult submitQuiz(Long quizId, Map<Long, String> userAnswers);
+    UserQuizResults submitQuiz(Long quizId, Map<Long, String> userAnswers, User user, long timeTakenMillis);
 }
