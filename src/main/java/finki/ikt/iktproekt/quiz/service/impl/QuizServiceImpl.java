@@ -16,7 +16,6 @@ import finki.ikt.iktproekt.exception.NotFoundEntityException;
 import finki.ikt.iktproekt.document.service.DocumentService;
 import finki.ikt.iktproekt.quiz.service.QuizService;
 import finki.ikt.iktproekt.user.service.UserService;
-import finki.ikt.iktproekt.question.service.QuestionService;
 
 import finki.ikt.iktproekt.quiz.repository.QuizRepository;
 
@@ -37,16 +36,15 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
 
+    private final QuestionRepository questionRepository;
+
     private final DocumentService documentService;
 
     private final UserService userService;
 
     private final QuestionService questionService;
 
-    private final QuestionRepository questionRepository;
-
     private final UserQuizResultsRepository userQuizResultsRepository;
-
     @Override
     public List<Quiz> findAll() {
         return quizRepository.findAll();
