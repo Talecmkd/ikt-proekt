@@ -2,6 +2,7 @@ package finki.ikt.iktproekt.quiz.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
 import finki.ikt.iktproekt.document.model.dto.DocumentDto;
+import finki.ikt.iktproekt.question.repository.QuestionRepository;
 import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
@@ -13,7 +14,6 @@ import finki.ikt.iktproekt.exception.NotFoundEntityException;
 import finki.ikt.iktproekt.document.service.DocumentService;
 import finki.ikt.iktproekt.quiz.service.QuizService;
 import finki.ikt.iktproekt.user.service.UserService;
-import finki.ikt.iktproekt.question.service.QuestionService;
 
 import finki.ikt.iktproekt.quiz.repository.QuizRepository;
 
@@ -33,11 +33,11 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
 
+    private final QuestionRepository questionRepository;
+
     private final DocumentService documentService;
 
     private final UserService userService;
-
-    private final QuestionService questionService;
 
     @Override
     public List<Quiz> findAll() {
@@ -103,7 +103,8 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizSubmissionResult submitQuiz(Long quizId, Map<Long, String> userAnswers) {
-        List<Question> questions = questionService.findAllByQuizId(quizId);
+        Quiz quiz = findById(quizId);
+        List<Question> questions = questionRepository.findAllByQuiz(quiz);
 
         int totalQuestions = questions.size();
         int correctCount = 0;
