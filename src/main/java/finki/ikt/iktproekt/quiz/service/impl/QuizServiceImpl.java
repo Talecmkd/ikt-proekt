@@ -2,20 +2,21 @@ package finki.ikt.iktproekt.quiz.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
 import finki.ikt.iktproekt.document.model.dto.DocumentDto;
-import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
+import finki.ikt.iktproekt.question.repository.QuestionRepository;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
+import finki.ikt.iktproekt.results.model.UserQuizResults;
+import finki.ikt.iktproekt.results.repository.UserQuizResultsRepository;
 import finki.ikt.iktproekt.user.model.User;
 import finki.ikt.iktproekt.quiz.model.Quiz;
+
+import finki.ikt.iktproekt.quiz.repository.QuizRepository;
 
 import finki.ikt.iktproekt.exception.NotFoundEntityException;
 
 import finki.ikt.iktproekt.document.service.DocumentService;
 import finki.ikt.iktproekt.quiz.service.QuizService;
 import finki.ikt.iktproekt.user.service.UserService;
-import finki.ikt.iktproekt.question.service.QuestionService;
-
-import finki.ikt.iktproekt.quiz.repository.QuizRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +36,13 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
 
+    private final QuestionRepository questionRepository;
+
     private final DocumentService documentService;
 
     private final UserService userService;
 
-    private final QuestionService questionService;
+    private final UserQuizResultsRepository userQuizResultsRepository;
 
     @Override
     public List<Quiz> findAll() {
@@ -103,18 +107,20 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizSubmissionResult submitQuiz(Long quizId, Map<Long, String> userAnswers) {
-        List<Question> questions = questionService.findAllByQuizId(quizId);
+    public UserQuizResults submitQuiz(Long quizId, Map<Long, String> userAnswers, User user, long timeTakenMillis) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
 
+        List<Question> questions = questionRepository.findAllByQuiz(quiz);
         int totalQuestions = questions.size();
         int correctCount = 0;
         List<String> feedback = new ArrayList<>();
 
         for (Question question : questions) {
-            String correctAnswer = question.getCorrectAnswer();
-            String userAnswer = userAnswers.get(question.getId());
+            String correctAnswer = question.getCorrectAnswer().trim();
+            String userAnswer = userAnswers.getOrDefault(question.getId(), "").trim();
 
-            if (userAnswer != null && userAnswer.equalsIgnoreCase(correctAnswer)) {
+            if (userAnswer.equalsIgnoreCase(correctAnswer)) {
                 correctCount++;
                 feedback.add("Q" + question.getId() + ": Correct");
             } else {
@@ -123,6 +129,10 @@ public class QuizServiceImpl implements QuizService {
         }
 
         double scorePercentage = ((double) correctCount / totalQuestions) * 100;
-        return new QuizSubmissionResult(scorePercentage, feedback);
+
+        UserQuizResults results = new UserQuizResults(user, quiz, scorePercentage, feedback, LocalDateTime.now(), timeTakenMillis);
+        return userQuizResultsRepository.save(results);
     }
+
+
 }
