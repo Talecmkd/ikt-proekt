@@ -1,6 +1,8 @@
 package finki.ikt.iktproekt.quiz.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.text.DocumentException;
+import finki.ikt.iktproekt.pdfexport.service.PdfExportService;
 import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.question.service.QuestionService;
@@ -42,9 +44,12 @@ public class QuizController {
     private final QuestionService questionService;
     private final UserService userService;
 
+    private final PdfExportService pdfExportService;
+
+
     @PostMapping("/create")
     public ResponseEntity<Quiz> createQuiz(@RequestParam String title,
-                                           @RequestParam MultipartFile file) {
+                                           @RequestParam MultipartFile file) throws IOException {
         return ResponseEntity.ok(quizService.create(title, file));
     }
 
@@ -98,5 +103,17 @@ public class QuizController {
         long startTime = System.currentTimeMillis();
         UserQuizResults result = quizService.submitQuiz(id, userAnswers, user, System.currentTimeMillis() - startTime);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}/export/pdf")
+    public ResponseEntity<byte[]> exportQuizToPdf(@PathVariable Long id) throws DocumentException {
+        byte[] pdfBytes = pdfExportService.exportQuizToPdf(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "quiz_" + id + ".pdf");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 }

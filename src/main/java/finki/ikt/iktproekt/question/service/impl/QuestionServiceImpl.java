@@ -1,24 +1,16 @@
 package finki.ikt.iktproekt.question.service.impl;
 
 import finki.ikt.iktproekt.question.model.Question;
-import finki.ikt.iktproekt.quiz.model.Quiz;
-
-import finki.ikt.iktproekt.question.service.QuestionService;
-import finki.ikt.iktproekt.quiz.service.QuizService;
-
 import finki.ikt.iktproekt.question.repository.QuestionRepository;
-
+import finki.ikt.iktproekt.question.service.QuestionService;
+import finki.ikt.iktproekt.quiz.model.Quiz;
+import finki.ikt.iktproekt.quiz.repository.QuizRepository;
+import finki.ikt.iktproekt.quiz.service.QuizService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Optional;
-import java.util.Objects;
-import java.util.ArrayList;
-
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,12 +18,19 @@ import java.util.stream.Collectors;
 public class QuestionServiceImpl implements QuestionService {
 
     private  final QuestionRepository questionRepository;
+    private final QuizRepository quizRepository;
+//    private final QuizService quizService;
 
-    private final QuizService quizService;
+//    @Override
+//    public List<Question> findAllByQuizId(Long quizId) {
+//        Quiz quiz = quizService.findById(quizId);
+//
+//        return questionRepository.findAllByQuiz(quiz);
+//    }
 
     @Override
     public List<Question> findAllByQuizId(Long quizId) {
-        Quiz quiz = quizService.findById(quizId);
+        Quiz quiz = quizRepository.findById(quizId).get();
 
         return questionRepository.findAllByQuiz(quiz);
     }
@@ -53,7 +52,6 @@ public class QuestionServiceImpl implements QuestionService {
         }
         throw new RuntimeException("Question not found");
     }
-
     @Override
     public void delete(Long id) {
             questionRepository.deleteById(id);
@@ -62,7 +60,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public void saveUserEditedQuestions(Long quizId, List<Question> questions) {
-        Quiz quiz = quizService.findById(quizId);
+        Quiz quiz = quizRepository.findById(quizId).get();
 
         List<Question> existingQuestions = questionRepository.findAllByQuiz(quiz);
 

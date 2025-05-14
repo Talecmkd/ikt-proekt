@@ -8,6 +8,7 @@ import finki.ikt.iktproekt.results.model.UserQuizResults;
 import finki.ikt.iktproekt.user.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public interface QuizService {
 
     Quiz findById(Long id);
 
-    Quiz create(String title, MultipartFile file);
+    Quiz create(String title, MultipartFile file) throws IOException;
 
     Quiz update(Long id, Quiz quiz);
 

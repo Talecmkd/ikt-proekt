@@ -11,12 +11,13 @@ import finki.ikt.iktproekt.document.service.DocumentService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Files;
@@ -65,26 +66,50 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Document validateAndSaveFile(MultipartFile file, User user) {
-        if (file.isEmpty() || !file.getContentType().equals("application/pdf")) {
-            throw new RuntimeException("Wrong file type. File must be PDF.");
+    public Document validateAndSaveFile(MultipartFile file, User user) throws IOException {
+        if (file.isEmpty()) {
+            throw new IOException("File is empty");
         }
-
+        if (!"application/pdf".equals(file.getContentType())) {
+            throw new IOException("File must be a PDF");
+        }
         if (file.getSize() > 10 * 1024 * 1024) {
-            throw new RuntimeException("File size must be less than 10MB");
+            throw new IOException("File size must be less than 10MB");
         }
 
-        String filePath = uploadDir + File.separator + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        try {
-            Path path = Paths.get(filePath);
-            Files.createDirectories(path.getParent());
-            file.transferTo(path);
+        try (PDDocument pdfDocument = PDDocument.load(file.getInputStream())) {
+            if (pdfDocument.isEncrypted()) {
+                throw new IOException("PDF is password-protected and cannot be processed");
+            }
+            if (pdfDocument.getNumberOfPages() == 0) {
+                throw new IOException("PDF contains no pages");
+            }
+
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(pdfDocument);
+
+            if (text == null || text.trim().isEmpty()) {
+                throw new IOException("PDF contains no readable text");
+            }
+            if (text.trim().length() < 50) {
+                throw new IOException("PDF must contain at least 50 characters of text");
+            }
         } catch (IOException e) {
-            throw new RuntimeException("File saving failed");
+            throw new IOException("Invalid PDF: " + e.getMessage(), e);
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+
+        try {
+            Files.createDirectories(filePath.getParent());
+            file.transferTo(filePath);
+        } catch (IOException e) {
+            throw new IOException("Failed to save file: " + e.getMessage(), e);
         }
 
         Document document = new Document();
-        document.setFilePath(filePath);
+        document.setFilePath(filePath.toString());
         document.setUser(user);
 
         return create(document);

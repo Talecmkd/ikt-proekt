@@ -2,14 +2,14 @@ package finki.ikt.iktproekt.quiz.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
 import finki.ikt.iktproekt.document.model.dto.DocumentDto;
+import finki.ikt.iktproekt.question.repository.QuestionRepository;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
+import finki.ikt.iktproekt.results.model.UserQuizResults;
+import finki.ikt.iktproekt.results.repository.UserQuizResultsRepository;
 import finki.ikt.iktproekt.user.model.User;
 import finki.ikt.iktproekt.quiz.model.Quiz;
-import finki.ikt.iktproekt.results.model.UserQuizResults;
 
-import finki.ikt.iktproekt.results.repository.UserQuizResultsRepository;
-import finki.ikt.iktproekt.question.repository.QuestionRepository;
 import finki.ikt.iktproekt.quiz.repository.QuizRepository;
 
 import finki.ikt.iktproekt.exception.NotFoundEntityException;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Quiz create(String title, MultipartFile file) {
+    public Quiz create(String title, MultipartFile file) throws IOException {
 
         User user = userService.getCurrentLoggedInUser();
 
