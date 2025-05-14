@@ -1,6 +1,8 @@
 package finki.ikt.iktproekt.quiz.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.text.DocumentException;
+import finki.ikt.iktproekt.pdfexport.service.PdfExportService;
 import finki.ikt.iktproekt.quiz.model.dto.QuizSubmissionResult;
 import finki.ikt.iktproekt.question.model.Question;
 import finki.ikt.iktproekt.question.service.QuestionService;
@@ -12,6 +14,7 @@ import finki.ikt.iktproekt.quiz.service.QuizService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,9 +40,12 @@ public class QuizController {
 
     private final QuestionService questionService;
 
+    private final PdfExportService pdfExportService;
+
+
     @PostMapping("/create")
     public ResponseEntity<Quiz> createQuiz(@RequestParam String title,
-                                           @RequestParam MultipartFile file) {
+                                           @RequestParam MultipartFile file) throws IOException {
         return ResponseEntity.ok(quizService.create(title, file));
     }
 
@@ -87,5 +93,17 @@ public class QuizController {
     public ResponseEntity<QuizSubmissionResult> submitQuiz(@PathVariable Long id, @RequestBody Map<Long, String> userAnswers) {
         QuizSubmissionResult result = quizService.submitQuiz(id, userAnswers);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}/export/pdf")
+    public ResponseEntity<byte[]> exportQuizToPdf(@PathVariable Long id) throws DocumentException {
+        byte[] pdfBytes = pdfExportService.exportQuizToPdf(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "quiz_" + id + ".pdf");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 }
