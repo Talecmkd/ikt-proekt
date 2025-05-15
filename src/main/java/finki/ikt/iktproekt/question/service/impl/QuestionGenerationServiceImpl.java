@@ -63,7 +63,7 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
 
     @Override
     @Transactional
-    public List<Question> generateQuestionsFromPdf(Long quizId) {
+    public List<Question> generateQuestionsFromPdf(Long quizId, int numberOfQuestions) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new NotFoundEntityException(Quiz.class));
 
@@ -77,7 +77,7 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
         } catch (IOException e) {
             throw new RuntimeException("Failed to extract text from pdf");
         }
-        String prompt = buildPrompt(text);
+        String prompt = buildPrompt(text, numberOfQuestions);
         String aiResponse = getAIResponse(prompt);
         return parseAndSaveQuestions(aiResponse, quiz);
     }
@@ -88,16 +88,17 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
         }
     }
 
-    private String buildPrompt(String text) {
+    private String buildPrompt(String text, int numberOfQuestions) {
         return String.format(
-            "Extracted text:\n%s\n\nGenerate exactly 3 multiple-choice questions with:\n" +
-            "- Format each question as:\n" +
-            "Question: [question text]\n" +
-            "A) [option1]\nB) [option2]\nC) [option3]\nD) [option4]\n" +
-            "Answer: [correct letter]\n" +
-            "- Ensure each question has exactly 4 options\n" +
-            "- Provide only the formatted questions, no additional text",
-            text.substring(0, Math.min(text.length(), 5000))
+                "Extracted text:\n%s\n\nGenerate exactly %d multiple-choice questions with:\n" +
+                "- Format each question as:\n" +
+                "Question: [question text]\n" +
+                "A) [option1]\nB) [option2]\nC) [option3]\nD) [option4]\n" +
+                "Answer: [correct letter]\n" +
+                "- Ensure each question has exactly 4 options\n" +
+                "- Provide only the formatted questions, no additional text",
+                text.substring(0, Math.min(text.length(), 5000)),
+                numberOfQuestions
         );
     }
 
