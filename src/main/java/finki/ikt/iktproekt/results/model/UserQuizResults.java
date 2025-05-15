@@ -1,29 +1,36 @@
 package finki.ikt.iktproekt.results.model;
 
+import finki.ikt.iktproekt.base.BaseEntity;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 import finki.ikt.iktproekt.user.model.User;
-import jakarta.persistence.*;
-import lombok.Data;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
 
 @Entity
-@Table(name = "user_quiz_results")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-public class UserQuizResults {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long result_id;
+@AllArgsConstructor
+public class UserQuizResults extends BaseEntity {
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
     @Column(nullable = false)
@@ -39,13 +46,4 @@ public class UserQuizResults {
 
     @Column(nullable = false)
     private long timeTakenMillis;
-
-    public UserQuizResults(User user, Quiz quiz, double scorePercentage, List<String> feedback, LocalDateTime submittedAt, long timeTakenMillis) {
-        this.user = user;
-        this.quiz = quiz;
-        this.scorePercentage = scorePercentage;
-        this.submittedAt = submittedAt;
-        this.feedback = feedback;
-        this.timeTakenMillis = timeTakenMillis;
-    }
 }

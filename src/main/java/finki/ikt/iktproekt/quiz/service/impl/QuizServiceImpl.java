@@ -1,15 +1,15 @@
 package finki.ikt.iktproekt.quiz.service.impl;
 
 import finki.ikt.iktproekt.document.model.Document;
-import finki.ikt.iktproekt.document.model.dto.DocumentDto;
-import finki.ikt.iktproekt.question.repository.QuestionRepository;
 import finki.ikt.iktproekt.question.model.Question;
-import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
-import finki.ikt.iktproekt.results.model.UserQuizResults;
-import finki.ikt.iktproekt.results.repository.UserQuizResultsRepository;
 import finki.ikt.iktproekt.user.model.User;
 import finki.ikt.iktproekt.quiz.model.Quiz;
 
+import finki.ikt.iktproekt.document.model.dto.DocumentDto;
+import finki.ikt.iktproekt.quiz.model.dto.QuizDto;
+
+import finki.ikt.iktproekt.results.repository.UserQuizResultsRepository;
+import finki.ikt.iktproekt.question.repository.QuestionRepository;
 import finki.ikt.iktproekt.quiz.repository.QuizRepository;
 
 import finki.ikt.iktproekt.exception.NotFoundEntityException;
@@ -25,10 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -98,41 +97,24 @@ public class QuizServiceImpl implements QuizService {
         Document document = documentService.findDocumentByQuiz(quiz);
         DocumentDto documentDto = documentService.mapDocumentToDto(document);
 
+        List<Question> questions = questionRepository.findAllByQuiz(quiz);
+
         QuizDto quizDto = new QuizDto();
         quizDto.setId(quiz.getId());
         quizDto.setDocument(documentDto);
         quizDto.setTitle(quiz.getTitle());
+        quizDto.setQuestions(questions);
 
         return quizDto;
     }
 
     @Override
-    public UserQuizResults submitQuiz(Long quizId, Map<Long, String> userAnswers, User user, long timeTakenMillis) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+    public List<QuizDto> getAllQuizzesByUser() {
+        User user = userService.getCurrentLoggedInUser();
 
-        List<Question> questions = questionRepository.findAllByQuiz(quiz);
-        int totalQuestions = questions.size();
-        int correctCount = 0;
-        List<String> feedback = new ArrayList<>();
-
-        for (Question question : questions) {
-            String correctAnswer = question.getCorrectAnswer().trim();
-            String userAnswer = userAnswers.getOrDefault(question.getId(), "").trim();
-
-            if (userAnswer.equalsIgnoreCase(correctAnswer)) {
-                correctCount++;
-                feedback.add("Q" + question.getId() + ": Correct");
-            } else {
-                feedback.add("Q" + question.getId() + ": Incorrect (Correct: " + correctAnswer + ")");
-            }
-        }
-
-        double scorePercentage = ((double) correctCount / totalQuestions) * 100;
-
-        UserQuizResults results = new UserQuizResults(user, quiz, scorePercentage, feedback, LocalDateTime.now(), timeTakenMillis);
-        return userQuizResultsRepository.save(results);
+        return quizRepository.findAllByUser(user)
+                .stream()
+                .map(this::mapQuizToDto)
+                .collect(Collectors.toList());
     }
-
-
 }
