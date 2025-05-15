@@ -57,4 +57,10 @@ public class UserController {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/current")
+    public ResponseEntity <User> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentLoggedInUser());
+    }
+
 }
