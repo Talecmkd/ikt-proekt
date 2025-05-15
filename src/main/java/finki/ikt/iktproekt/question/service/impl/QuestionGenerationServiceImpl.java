@@ -89,16 +89,43 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
     }
 
     private String buildPrompt(String text, int numberOfQuestions) {
+        int trueFalseCount = Math.max(1, numberOfQuestions / 3);
+        int multipleChoiceCount = numberOfQuestions - trueFalseCount;
+
+
         return String.format(
-                "Extracted text:\n%s\n\nGenerate exactly %d multiple-choice questions with:\n" +
-                "- Format each question as:\n" +
-                "Question: [question text]\n" +
-                "A) [option1]\nB) [option2]\nC) [option3]\nD) [option4]\n" +
-                "Answer: [correct letter]\n" +
-                "- Ensure each question has exactly 4 options\n" +
-                "- Provide only the formatted questions, no additional text",
+                "TEXT TO BASE QUESTIONS ON:\n%s\n\n" +
+                        "GENERATE EXACTLY %d QUESTIONS:\n" +
+                        "%d MULTIPLE CHOICE and %d TRUE/FALSE\n\n" +
+                        "STRICT FORMATTING RULES - FOLLOW EXACTLY:\n\n" +
+                        "MULTIPLE CHOICE QUESTIONS (%d):\n" +
+                        "1. Start with: 'MC: [question]'\n" +
+                        "2. Provide 4 options labeled A-D\n" +
+                        "3. End with: 'Correct: [letter]'\n" +
+                        "EXAMPLE:\n" +
+                        "MC: What is the capital of France?\n" +
+                        "A) London\nB) Paris\nC) Berlin\nD) Madrid\n" +
+                        "Correct: B\n\n" +
+                        "TRUE/FALSE QUESTIONS (%d):\n" +
+                        "1. Start with: 'TF: [statement]'\n" +
+                        "2. End with: 'Correct: [TRUE/FALSE]'\n" +
+                        "EXAMPLE:\n" +
+                        "TF: The capital of France is Paris.\n" +
+                        "Correct: TRUE\n\n" +
+                        "NON-NEGOTIABLE REQUIREMENTS:\n" +
+                        "- Generate exactly %d MC and %d TF questions\n" +
+                        "- Use EXACT formats above - no variations\n" +
+                        "- Base ALL questions strictly on provided text\n" +
+                        "- Mix question types in output (don't group)\n" +
+                        "- Only output questions in specified format",
                 text.substring(0, Math.min(text.length(), 5000)),
-                numberOfQuestions
+                numberOfQuestions,
+                multipleChoiceCount,
+                trueFalseCount,
+                multipleChoiceCount,
+                trueFalseCount,
+                multipleChoiceCount,
+                trueFalseCount
         );
     }
 
@@ -128,7 +155,7 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
     private List<Question> parseAndSaveQuestions(String response, Quiz quiz) {
         List<Question> questions = new ArrayList<>();
         String[] blocks = response.split("\n\n");
-        
+
         for (String block : blocks) {
             try {
                 Question question = parseSingleQuestion(block, quiz);
@@ -140,52 +167,71 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
                 e.printStackTrace();
             }
         }
-        
+
         return questions.isEmpty() ? Collections.emptyList() : questionRepository.saveAll(questions);
     }
-    
+
     private Question parseSingleQuestion(String block, Quiz quiz) {
-        if (!block.startsWith("Question:")) return null;
-        
+        if (block.startsWith("MC:")) {
+            return parseMultipleChoiceQuestion(block, quiz);
+        } else if (block.startsWith("TF:")) {
+            return parseTrueFalseQuestion(block, quiz);
+        }
+        return null;
+    }
+
+    private Question parseMultipleChoiceQuestion(String block, Quiz quiz) {
         String[] lines = block.split("\n");
-        if (lines.length < 6) return null;
-        
+        if (lines.length < 3) return null;
+
         Question question = new Question();
         question.setQuestionType(QuestionType.MULTIPLE_CHOICE);
         question.setQuiz(quiz);
-        question.setQuestionText(lines[0].replace("Question:", "").trim());
-        
-        List<String> answers = extractAnswers(lines);
-        if (answers.size() < 2) return null;
-        
-        question.setAnswers(answers);
-        setCorrectAnswer(question, lines, answers);
-        
-        return question.getCorrectAnswer() != null ? question : null;
-    }
+        question.setQuestionText(lines[0].replace("MC:", "").trim());
 
-    private List<String> extractAnswers(String[] lines) {
         List<String> answers = new ArrayList<>();
-        for (int i = 1; i < lines.length && answers.size() < 4; i++) {
-            if (lines[i].matches("^[A-D][).] .*")) {
+        for (int i = 1; i < lines.length - 1; i++) {
+            if (lines[i].matches("^[A-D]\\) .*")) {
                 answers.add(lines[i].substring(3).trim());
             }
         }
-        return answers;
-    }
 
-    private void setCorrectAnswer(Question question, String[] lines, List<String> answers) {
-        for (int i = 1; i < lines.length; i++) {
-            if (lines[i].toLowerCase().startsWith("answer:")) {
-                String correctLetter = lines[i].replaceAll("(?i)answer:", "").trim();
-                if (!correctLetter.isEmpty()) {
-                    int index = correctLetter.toUpperCase().charAt(0) - 'A';
-                    if (index >= 0 && index < answers.size()) {
-                        question.setCorrectAnswer(answers.get(index));
-                    }
+        if (answers.size() < 2) return null;
+        question.setAnswers(answers);
+
+
+        String correctLine = lines[lines.length - 1];
+        if (correctLine.startsWith("Correct:")) {
+            String correctLetter = correctLine.replace("Correct:", "").trim();
+            if (!correctLetter.isEmpty()) {
+                int index = correctLetter.charAt(0) - 'A';
+                if (index >= 0 && index < answers.size()) {
+                    question.setCorrectAnswer(answers.get(index));
                 }
-                break;
             }
         }
+
+        return question.getCorrectAnswer() != null ? question : null;
     }
+
+    private Question parseTrueFalseQuestion(String block, Quiz quiz) {
+        String[] lines = block.split("\n");
+        if (lines.length != 2) return null;
+
+        Question question = new Question();
+        question.setQuestionType(QuestionType.TRUE_FALSE);
+        question.setQuiz(quiz);
+        question.setQuestionText(lines[0].replace("TF:", "").trim());
+        question.setAnswers(List.of("TRUE", "FALSE"));
+
+        if (lines[1].startsWith("Correct:")) {
+            String correct = lines[1].replace("Correct:", "").trim();
+            if (correct.equalsIgnoreCase("TRUE") || correct.equalsIgnoreCase("FALSE")) {
+                question.setCorrectAnswer(correct.toUpperCase());
+            }
+        }
+
+        return question.getCorrectAnswer() != null ? question : null;
+    }
+
 }
