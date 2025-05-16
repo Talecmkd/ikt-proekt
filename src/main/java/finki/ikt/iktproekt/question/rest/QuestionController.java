@@ -23,8 +23,10 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @PostMapping("/generate/{quizId}")
-    public ResponseEntity<List<Question>> generateQuestionsFromPdf(@PathVariable Long quizId) {
-        return ResponseEntity.ok(questionGenerationService.generateQuestionsFromPdf(quizId));
+    public ResponseEntity<List<Question>> generateQuestionsFromPdf(
+            @PathVariable Long quizId,
+            @RequestParam(defaultValue = "5") int numberOfQuestions) {
+        return ResponseEntity.ok(questionGenerationService.generateQuestionsFromPdf(quizId, numberOfQuestions));
     }
 
     @GetMapping("/{quizId}")
