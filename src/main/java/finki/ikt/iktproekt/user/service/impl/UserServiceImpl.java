@@ -6,6 +6,7 @@ import finki.ikt.iktproekt.security.JwtUtil;
 
 import finki.ikt.iktproekt.user.model.User;
 
+import finki.ikt.iktproekt.user.model.dto.UserUpdateRequest;
 import finki.ikt.iktproekt.user.repository.UserRepository;
 
 import finki.ikt.iktproekt.user.service.UserService;
@@ -47,12 +48,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(Long id, User user) {
-        if (userRepository.existsById(id)) {
-//            user.setUser_id(id);
-            return userRepository.save(user);
-        }
-        throw new RuntimeException("User not found");
+    public User update(UserUpdateRequest userUpdateRequest) {
+        User user = getCurrentLoggedInUser();
+
+        user.setEmail(userUpdateRequest.getEmail());
+        user.setName(userUpdateRequest.getName());
+
+        return userRepository.save(user);
     }
 
     @Override

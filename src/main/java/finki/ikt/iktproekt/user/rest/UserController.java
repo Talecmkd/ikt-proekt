@@ -1,5 +1,6 @@
 package finki.ikt.iktproekt.user.rest;
 
+import finki.ikt.iktproekt.user.model.dto.UserUpdateRequest;
 import finki.ikt.iktproekt.user.service.UserService;
 
 import finki.ikt.iktproekt.user.model.User;
@@ -43,13 +44,9 @@ public class UserController {
         return ResponseEntity.ok(userService.create(user));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        try {
-            return ResponseEntity.ok(userService.update(id, user));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping("/update")
+    public ResponseEntity<User> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
+        return ResponseEntity.ok(userService.update(userUpdateRequest));
     }
 
     @DeleteMapping("delete/{id}")
