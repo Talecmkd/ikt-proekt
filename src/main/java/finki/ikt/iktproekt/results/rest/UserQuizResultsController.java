@@ -107,9 +107,9 @@ public class UserQuizResultsController {
         return ResponseEntity.ok(userQuizResultsService.getResFromAllUsers());
     }
 
-    @GetMapping("/quiz/{quizId}")
-    public ResponseEntity<List<UserQuizResults>> getResultsForUserAndQuiz(@PathVariable Long quizId) {
-        return ResponseEntity.ok(userQuizResultsService.getResultsForUserAndQuiz(quizId));
+    @GetMapping("/user")
+    public ResponseEntity<List<UserQuizResults>> getResultsForUserAndQuiz() {
+        return ResponseEntity.ok(userQuizResultsService.getResultsForUserAndQuiz());
     }
 
     @GetMapping("{resultId}")

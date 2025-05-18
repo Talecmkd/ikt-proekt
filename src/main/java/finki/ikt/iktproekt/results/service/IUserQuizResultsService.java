@@ -10,7 +10,7 @@ public interface IUserQuizResultsService {
 
     List<UserQuizResults> getResFromAllUsers();
 
-    List<UserQuizResults> getResultsForUserAndQuiz(Long quizId);
+    List<UserQuizResults> getResultsForUserAndQuiz();
 
     UserQuizResults submitQuiz(Long quizId, Map<Long, String> userAnswers, User user, long timeTakenMillis);
 

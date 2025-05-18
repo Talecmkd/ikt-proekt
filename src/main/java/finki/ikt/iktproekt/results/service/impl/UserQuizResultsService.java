@@ -74,9 +74,9 @@ public class UserQuizResultsService implements IUserQuizResultsService {
     }
 
     @Override
-    public List<UserQuizResults> getResultsForUserAndQuiz(Long quizId) {
+    public List<UserQuizResults> getResultsForUserAndQuiz() {
         User user = userService.getCurrentLoggedInUser();
 
-        return userQuizResultsRepository.findByUser_IdAndQuiz_Id(user.getId(), quizId);
+        return userQuizResultsRepository.findAllByUser(user);
     }
 }
