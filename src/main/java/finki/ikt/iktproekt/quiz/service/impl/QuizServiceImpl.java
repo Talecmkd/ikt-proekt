@@ -18,6 +18,7 @@ import finki.ikt.iktproekt.document.service.DocumentService;
 import finki.ikt.iktproekt.quiz.service.QuizService;
 import finki.ikt.iktproekt.user.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -40,8 +41,6 @@ public class QuizServiceImpl implements QuizService {
     private final DocumentService documentService;
 
     private final UserService userService;
-
-    private final UserQuizResultsRepository userQuizResultsRepository;
 
     @Override
     public List<Quiz> findAll() {
@@ -78,16 +77,15 @@ public class QuizServiceImpl implements QuizService {
         throw new RuntimeException("Quiz not found");
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new RuntimeException("Quiz not found"));
+        Quiz quiz = findById(id);
 
-//        if (quiz.getDocument() != null && quiz.getDocument().getFilePath() != null) {
-//            File file = new File(quiz.getDocument().getFilePath());
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//        }
+        Document document = documentService.findDocumentByQuiz(quiz);
+
+        documentService.delete(document.getId());
+        questionRepository.deleteAllByQuiz(quiz);
 
         quizRepository.deleteById(id);
     }
